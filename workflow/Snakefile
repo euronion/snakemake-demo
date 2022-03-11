@@ -2,30 +2,37 @@ rule say_hello:
     script:
         "scripts/say_hello.py"
 
-rule greet_giessen:
-    input:
-        city="data/giessen.txt",
-    output:
-        city="results/greetings_giessen.txt"
-    script:
-        "scripts/greet_city.py"
 
-rule greet_berlin:
-    input:
-        city="data/berlin.txt",
-    output:
-        city="results/berlin.txt",
-    script:
-        "scripts/greet_city.py"
+if True:
 
-## Wildcard generalisation
-#rule greet_city:
-#    input:
-#        city="data/{city}.txt",
-#    output:
-#        city="result/greetings_{city}.txt"
-#    script:
-#        "scripts/greet_city.py"
+    rule greet_giessen:
+        input:
+            city="data/giessen.txt",
+        output:
+            city="results/greetings_giessen.txt",
+        script:
+            "scripts/greet_city.py"
+
+    rule greet_berlin:
+        input:
+            city="data/berlin.txt",
+        output:
+            city="results/berlin.txt",
+        script:
+            "scripts/greet_city.py"
+
+
+else:
+
+    # Wildcard generalisation
+    rule greet_city:
+        input:
+            city="data/{city}.txt",
+        output:
+            city="result/greetings_{city}.txt",
+        script:
+            "scripts/greet_city.py"
+
 
 rule greet_city:
     input:
@@ -34,6 +41,7 @@ rule greet_city:
         city="data/{city}.txt",
     script:
         "scripts/greet_city.py"
+
 
 rule combine_tickets:
     input:
@@ -46,6 +54,7 @@ rule combine_tickets:
         tickets="resources/tickets.csv",
     script:
         "scripts/combine_tickets.py"
+
 
 rule make_conference_schedule:
     input:
