@@ -1,0 +1,296 @@
+\documentclass[10pt,aspectratio=169,dvipsnames]{beamer}
+\usetheme[block=fill, progressbar=frametitle, subsectionpage=progressbar]{metropolis}           % Use metropolis theme
+
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{csquotes}
+\usepackage{siunitx}
+\sisetup{per-mode=symbol}
+\DeclareSIUnit{\MWh}{{\mega\watt\hour}}
+\DeclareSIUnit{\EUR}{EUR}
+\usepackage[version=4]{mhchem}
+
+% Use special social network logos
+\usepackage{fontawesome}
+
+\usepackage{xcolor}
+\definecolor{jlugblue}{RGB}{0,105,179}
+\definecolor{jluggrey}{RGB}{83,96,107}
+\definecolor{jluglightblue}{RGB}{220,230,235}
+
+\setbeamercolor{normal text}{fg=black,bg=white}
+%\setbeamercolor{alerted text}{fg=red}
+%\setbeamercolor{example text}{fg=green!50!black}
+
+\setbeamercolor{frametitle}{bg=jlugblue, fg=white}
+\setbeamercolor{progress bar}{fg=jlugblue,bg=jluglightblue}
+\setbeamercolor{title separator}{fg=jlugblue}
+\setbeamercolor{progress bar in head/foot}{fg=jlugblue,bg=jluglightblue}
+\setbeamercolor{progress bar in section page}{fg=jlugblue}
+
+% Wider progressbar, see: https://tex.stackexchange.com/a/577202
+\makeatletter
+\setlength{\metropolis@titleseparator@linewidth}{1pt}
+\setlength{\metropolis@progressonsectionpage@linewidth}{1pt}
+\setlength{\metropolis@progressinheadfoot@linewidth}{1pt}
+\makeatother
+
+\usepackage[T1]{fontenc}
+
+\usepackage[scale=2]{ccicons}
+
+% font for base text
+\setsansfont{Carlito}
+
+
+% for sources http://tex.stackexchange.com/questions/48473/best-way-to-give-sources-of-images-used-in-a-beamer-presentation
+\setbeamercolor{framesource}{fg=jluggrey}
+\setbeamerfont{framesource}{size=\tiny}
+\usepackage[absolute,overlay]{textpos}
+\newcommand{\source}[1]{\begin{textblock*}{5cm}(10.2cm,8.cm)
+        \begin{beamercolorbox}[ht=0.5cm,right]{framesource}
+            \usebeamerfont{framesource}\usebeamercolor[fg]{framesource} Source: {#1}
+        \end{beamercolorbox}
+\end{textblock*}}
+
+\title{Snakemake}
+\subtitle{Making data workflows easier and more reproducible}
+\date{16 March 2022}
+\author{Johannes Hampp}
+\institute{
+    Center for International Development and Environmental Research (ZEU) \\ %
+    Justus-Liebig University Giessen \\ \\ %
+}
+%\titlegraphic{\includegraphics[width=\textwidth]{jlu-logo-600}}
+
+% Abstract
+%Center for international Development and Environmental Research, Justus Liebig University Giessen
+%Daily scientific work often involves handling research data from experiments or simulations. Necessary data wrangling and analysis steps are usually repeated following predefined steps. Snakemake aims to make this process easier, faster, less error-prone, improving transparency and reproducibility. Individual steps are split into standalone rules, which are flexibly combined into workflows. Workflows are defined in a simple and human-readable format. They are automatically executed to keep any data dependencies up-to-date. Snakemake thus ensures ordered, transparent and documented data workflows, significantly reducing human errors from manual workflow execution or from improvised, selfwritten workflow solutions. Snakemake is open source software and supports popular programming languages like R, Python and Julia. Furthermore, integration with other programming languages or programmes is possible as long as they offer a command line interface. Many more features are available. For yourself, Snakemake makes your life easier, more productive
+%and more fun. For other researchers, well-documented and automatic workflows increase the accessibility and reproducibility of your research
+%and research data.
+
+\begin{document}
+    
+% Title page    
+\begin{frame}
+    \titlepage
+    
+    \begin{tikzpicture}[overlay, remember picture]
+        \node[above left=1cm and .8cm of current page.south east] {\includegraphics[width=3cm]{jlu-logo-600}};
+    \end{tikzpicture}
+    % Place JLU logo on title page, based on https://tex.stackexchange.com/a/21370
+    \source{\href{https://www.uni-giessen.de/ueber-uns/pressestelle/service/jlu-logo}{Logo JLU Gießen, all rights reserved.}}
+\end{frame}
+
+% Table of contents
+\begin{frame}{Outline}
+    \tableofcontents
+%        \tableofcontents[thideallsubsections]
+\end{frame}
+
+
+\section{Is it relevant for you and me?}
+
+\begin{frame}{Significance}
+    \textbf{Who am I?}
+    \begin{itemize}
+        \item
+            B./M.Sc. in experimental physics (modelling + experiment data crunching)
+        \item
+            PhD student in Energy System Modelling
+        \item
+            Proponent of Open Source Software, Data, Access
+        \item
+            Co-maintainer of multiple OSS packages and models with 10+ core devs
+        \item
+            I've seen a lot of multi-generation models (physics, economics, energy systems)
+    \end{itemize}
+
+    \centering
+    \textbf{\texttt{snakemake} turned my way of working upside down.}
+
+\end{frame}
+
+\begin{frame}{Demand and supply: More than 1400 citations}
+    \includegraphics[width=\textwidth]{snakemake-screenshot-rtd}
+    
+    \source{Screenshot \url{https://snakemake.readthedocs.io}}
+\end{frame}
+
+\begin{frame}{Research: Can (not) reproduce}
+    
+    \begin{columns}[c]
+        \column{.5\textwidth}
+        \centering
+        \includegraphics[height=.8\textheight]{works-for-me_cant-reproduce}
+        
+        \column{.5\textwidth}
+        
+        Challenges (e.g. model or data pipeline for experimental data):
+        
+        \begin{itemize}
+            \item
+                Legacy work (previous PhD student, own work, student assistants, other researchers)
+            \item
+                Which data goes in, which data goes out?
+                (documentation is nice, is it comprehensible and up-to-date?)
+            \item
+                How to execute the pipeline?\newline
+                (same data or new data)
+            \item
+                Something is not working, but what?\newline
+                (thousands of lines of monolithic code)
+            \item
+                How to extent on the work?\newline 
+                (\enquote{I'll just put this in here...})
+        \end{itemize}
+    \end{columns}
+    \source{\href{https://devrant.com/rants/1956828/so-i-was-strolling-around-some-open-source-project-on-github-this-particular-one}{devrant.com}}
+\end{frame}
+
+
+\begin{frame}{Documentation TL;DR}
+    
+    
+    \begin{columns}[c]
+        \column{.5\textwidth}
+    
+        \includegraphics[height=.8\textheight]{advanced-nuclear}
+    
+        \column{.5\textwidth}
+        \enquote{Documentation too lax; did not reproduce}?
+        
+        
+        A common workflow example
+        \begin{enumerate}
+            
+            \item
+                Order preserved by file names
+            \item
+                When to run \texttt{PreProcess.py}?
+            \item
+                No additional documentation (Except for paper: \enquote{We did so-and-so...})
+            \item
+                Which parts do I need to run if I change external (input) data?
+                
+        \end{enumerate}
+    
+    \end{columns}
+                
+    \source{\href{https://github.com/euronion/Advanced_nuclear_2021/tree/main/Model\%20and\%20input\%20data}{Screenshot GitHub Repository}}
+\end{frame}
+
+\section{Making research more FAIR?}
+\begin{frame}{\enquote{R} stands for \enquote{Reusable}}
+    
+    What does that really entail?
+    
+    \begin{itemize}
+        \item Repeat \& Rerun
+        \item Reproduce 
+        \item Replicate
+        \item Reliable \& Robust
+        \item Rapport building
+    \end{itemize}
+
+    \source{\href{https://www.slideshare.net/PaulMichaelAgapow/introduction-to-snakemake}{Loosely based on Agapow (2017)}}
+\end{frame}
+
+\section{Quick overview}
+\begin{frame}{What it is}
+    \centering
+    
+    Snakemake is a workflow management system.
+    
+
+    It is a system to manage workflows.
+    
+\end{frame}
+
+\begin{frame}[fragile]{Core concept: Rules}
+    
+\begin{lstlisting}
+    rule do_research:
+        input:
+            # define input dependencies
+            'raw_data.csv' 
+        output:
+            # files created through this rule
+            'research_results.csv' 
+        run:
+            # your magic converting <input> to <output>
+            'research.py'
+\end{lstlisting}
+
+Support for: Python, R, R Markdown, Julia, Rust, Jupyter notebooks and any shell command (!)
+    
+\end{frame}
+
+\begin{frame}{Advantages (highly opiniated selection)}
+    \begin{tabular}{ll}
+        What it does                                         & How it helps                                   \\
+        \midrule
+        Human readable workflow definition                   & Easy and fast to learn                         \\
+                                                             & Define (and implicitly document) dependencies  \\
+                                                             & Faster onboarding of new students \& staff     \\
+                                                             &  \\
+        Explicit dependencies                                & Reduces mishaps and mistakes                   \\
+                                                             & from manual execution                          \\
+                                                             &  \\
+        \enquote{Rules} (Dependencies) defined and monitored & Automatic re-run if input or code is updated   \\
+        Scales well                                          & Independent rules run as such                  \\
+                                                             & Rules can be kept small                        \\
+                                                             & (good for collab., error tracking, re-running)
+    \end{tabular}
+    
+\end{frame}
+
+
+\section{Live presentation}
+\begin{frame}{Hoping this works...}
+    
+    \centering
+    
+    \includegraphics[height=.9\textheight]{software-demo}
+
+
+    \source{\href{https://www.reddit.com/r/ProgrammerHumor/comments/8xa9k1/it_works_on_my_machine_ツ/}{Reddit}}
+\end{frame}
+
+
+
+\begin{frame}{How to get started}
+    \begin{itemize}
+        \item Website, Docs, Tutorials, Videos, Best Practices: \url{https://snakemake.github.io}
+        \item Rolling paper: \url{https://f1000research.com/articles/10-33/v1}
+        \item Code from live demo: \url{https://github.com/euronion/snakemake-demo}
+        \item Download and install (with Anaconda): \texttt{conda install -c bioconda snakemake}
+    \end{itemize}
+
+    \centering
+    \includegraphics[height=4cm]{snakemakeio.png}
+    
+    \source{\url{https://snakemake.github.io}}
+
+\end{frame}
+
+
+\begin{frame}{License}
+    
+    
+    
+    Except where otherwise noted, this work and its contents 
+    (texts and illustrations) are  licensed under
+    \href{http://creativecommons.org/licenses/by/4.0/}{Creative Commons
+        Attribution 4.0 International License}.
+    
+    \textcopyright 2022 Johannes Hampp
+
+    \begin{center}\ccby\end{center}
+    
+\end{frame}
+
+\end{document}
