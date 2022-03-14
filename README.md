@@ -1,5 +1,9 @@
 # Demo for Snakemake (DPG spring meeting 2022, Erlangen, Hacky Hour)
 
+> Joint session AGI/AKjDPG
+> AGI 1.2: Talk, Wednesday, March 16, 2022, 14:45-15:15, AGI-H20
+> Link to proceedings: https://www.dpg-verhandlungen.de/year/2022/conference/erlangen/part/agi/session/1/contribution/2
+
 ## Installation
 
 *Note:*
