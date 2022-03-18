@@ -34,15 +34,6 @@ else:
             "scripts/greet_city.py"
 
 
-rule greet_city:
-    input:
-        city="data/{city}.txt",
-    output:
-        city="data/{city}.txt",
-    script:
-        "scripts/greet_city.py"
-
-
 rule combine_tickets:
     input:
         tickets=[
