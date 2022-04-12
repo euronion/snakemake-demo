@@ -29,7 +29,7 @@ else:
         input:
             city="data/{city}.txt",
         output:
-            city="result/greetings_{city}.txt",
+            city="results/greetings_{city}.txt",
         script:
             "scripts/greet_city.py"
 
